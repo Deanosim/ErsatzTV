@@ -1,11 +1,9 @@
-﻿# https://hub.docker.com/_/microsoft-dotnet
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
-RUN apt-get update && apt-get install -y ca-certificates
+RUN apt-get update && apt-get install --no-install-recommends -y ca-certificates && rm -rf /var/lib/apt/lists/*
 RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash -
-RUN apt-get install -y nodejs
+RUN apt-get install --no-install-recommends -y nodejs
 WORKDIR /source
 
-# copy csproj and restore as distinct layers
 COPY *.sln .
 COPY nuget.config .
 COPY lib/nuget/* ./lib/nuget/
@@ -21,7 +19,6 @@ COPY ErsatzTV.Infrastructure.MySql/*.csproj ./ErsatzTV.Infrastructure.MySql/
 COPY ErsatzTV.Scanner/*.csproj ./ErsatzTV.Scanner/
 RUN dotnet restore -r linux-x64 ErsatzTV/
 
-# copy everything else and build app
 COPY ErsatzTV/. ./ErsatzTV/
 COPY ErsatzTV.Application/. ./ErsatzTV.Application/
 COPY ErsatzTV.Core/. ./ErsatzTV.Core/
@@ -37,7 +34,6 @@ WORKDIR /source/ErsatzTV
 RUN sed -i '/Scanner/d' ErsatzTV.csproj
 RUN dotnet publish ErsatzTV.csproj -c release -o /app -r linux-x64 --self-contained false --no-restore /p:DebugType=Embedded /p:InformationalVersion=${INFO_VERSION}
 
-# final stage/image
 FROM jasongdove/ersatztv-ffmpeg:6.0 AS runtime-base
 ENV FONTCONFIG_PATH=/etc/fonts
 RUN fc-cache update
