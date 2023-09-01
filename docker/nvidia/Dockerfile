@@ -1,8 +1,8 @@
 ﻿# https://hub.docker.com/_/microsoft-dotnet
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
-RUN apt-get update && apt-get install -y ca-certificates
+RUN apt-get update && apt-get install --no-install-recommends -y ca-certificates && rm -rf /var/lib/apt/lists/*
 RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash -
-RUN apt-get install -y nodejs
+RUN apt-get install --no-install-recommends -y nodejs
 WORKDIR /source
 
 # copy csproj and restore as distinct layers
